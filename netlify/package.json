@@ -1,0 +1,9 @@
+{
+  "name": "healthcare-webhook",
+  "version": "1.0.0",
+  "description": "Free healthcare webhook for Dialogflow",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build needed'"
+  }
+}
