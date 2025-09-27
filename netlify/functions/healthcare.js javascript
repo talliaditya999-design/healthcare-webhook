@@ -1,0 +1,58 @@
+// netlify/functions/healthcare.js
+exports.handler = async (event) => {
+  try {
+    // Parse the Dialogflow request
+    const request = JSON.parse(event.body);
+    const intent = request.queryResult.intent.displayName;
+    const parameters = request.queryResult.parameters;
+    
+    // Simple healthcare database (FREE - no API costs)
+    const medicineInfo = {
+      'paracetamol': '💊 Paracetamol (Acetaminophen)\n• Uses: Pain relief, fever reduction\n• Dose: 500-1000mg every 4-6 hours\n• Side effects: Rare at recommended doses\n• Warning: Do not exceed 4000mg daily',
+      'ibuprofen': '💊 Ibuprofen\n• Uses: Pain, inflammation, fever\n• Dose: 200-400mg every 4-6 hours\n• Take with food to avoid stomach upset\n• Avoid if allergic to NSAIDs',
+      'aspirin': '💊 Aspirin\n• Uses: Pain relief, anti-inflammatory\n• Dose: 300-600mg as needed\n• Blood thinner - consult doctor before use',
+      'antibiotics': '💊 Antibiotics\n• For bacterial infections only\n• Complete full course as prescribed\n• Never share or reuse antibiotics'
+    };
+    
+    const symptomAdvice = {
+      'fever': '🌡️ Fever Advice:\n• Rest and drink plenty of fluids\n• Use paracetamol or ibuprofen for comfort\n• Seek medical help if fever >104°F (40°C) or lasts >3 days',
+      'headache': '🤕 Headache Care:\n• Rest in quiet, dark room\n• Stay hydrated\n• Over-the-counter pain relief if needed\n• See doctor if severe, sudden, or persistent',
+      'cough': '😷 Cough Management:\n• Stay hydrated with warm fluids\n• Honey can help soothe throat\n• Avoid irritants like smoke\n• Doctor if difficulty breathing or lasts >3 weeks',
+      'chest pain': '🚨 CHEST PAIN - EMERGENCY!\n• This could be serious\n• Call emergency services immediately\n• Do not drive yourself to hospital'
+    };
+    
+    let responseText = 'Please consult a healthcare professional for personalized medical advice.';
+    
+    // Handle medicine inquiries
+    if (parameters.medicine && medicineInfo[parameters.medicine.toLowerCase()]) {
+      responseText = medicineInfo[parameters.medicine.toLowerCase()];
+    }
+    
+    // Handle symptom inquiries
+    if (parameters.symptom && symptomAdvice[parameters.symptom.toLowerCase()]) {
+      responseText = symptomAdvice[parameters.symptom.toLowerCase()];
+    }
+    
+    // Handle unknown requests
+    if (intent === 'Default Fallback Intent') {
+      responseText = 'I specialize in general medicine information. Ask me about symptoms or medicines. For emergencies, call your local emergency number.';
+    }
+    
+    // Return response to Dialogflow
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        fulfillmentText: responseText,
+        source: 'healthcare-webhook'
+      })
+    };
+    
+  } catch (error) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        fulfillmentText: 'I apologize, I encountered an error. Please try again or consult a healthcare provider.'
+      })
+    };
+  }
+};
